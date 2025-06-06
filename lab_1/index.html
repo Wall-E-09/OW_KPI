@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розрахунок складу палива та теплоти згоряння</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Розрахунок складу палива та теплоти згоряння</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('task1', event)">Завдання 1</button>
+            <button class="tab-button" onclick="openTab('task2', event)">Завдання 2</button>
+        </div>
+        
+        <div id="task1" class="tab-content active">
+            <h2>Розрахунок складу сухої та горючої маси палива</h2>
+            <form id="fuelForm1">
+                <div class="input-group">
+                    <label for="Hp">H<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Hp" required>
+                </div>
+                <div class="input-group">
+                    <label for="Cp">C<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Cp" required>
+                </div>
+                <div class="input-group">
+                    <label for="Sp">S<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Sp" required>
+                </div>
+                <div class="input-group">
+                    <label for="Np">N<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Np" required>
+                </div>
+                <div class="input-group">
+                    <label for="Op">O<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Op" required>
+                </div>
+                <div class="input-group">
+                    <label for="Wp">W<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Wp" required>
+                </div>
+                <div class="input-group">
+                    <label for="Ap">A<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Ap" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit">Розрахувати</button>
+                    <button type="button" onclick="checkControlExample(event)" class="blue-button">Перевірити контрольний приклад</button>
+                    <button type="button" onclick="calculateVariant9(event)" class="orange-button">Розрахувати для 9 варіанту</button>
+                </div>
+            </form>
+            
+            <div id="results1" class="results">
+                <h3>Результати:</h3>
+                <div id="resultsContent1"></div>
+            </div>
+        </div>
+        
+        <div id="task2" class="tab-content">
+            <h2>Перерахунок складу мазуту на робочу масу</h2>
+            <form id="fuelForm2">
+                <div class="input-group">
+                    <label for="Hg">H<sup>Г</sup>, %:</label>
+                    <input type="number" step="0.01" id="Hg" required>
+                </div>
+                <div class="input-group">
+                    <label for="Cg">C<sup>Г</sup>, %:</label>
+                    <input type="number" step="0.01" id="Cg" required>
+                </div>
+                <div class="input-group">
+                    <label for="Sg">S<sup>Г</sup>, %:</label>
+                    <input type="number" step="0.01" id="Sg" required>
+                </div>
+                <div class="input-group">
+                    <label for="Og">O<sup>Г</sup>, %:</label>
+                    <input type="number" step="0.01" id="Og" required>
+                </div>
+                <div class="input-group">
+                    <label for="Qdaf">Q<sub>i</sub><sup>daf</sup>, МДж/кг:</label>
+                    <input type="number" step="0.01" id="Qdaf" required>
+                </div>
+                <div class="input-group">
+                    <label for="Wr">W<sup>P</sup>, %:</label>
+                    <input type="number" step="0.01" id="Wr" required>
+                </div>
+                <div class="input-group">
+                    <label for="Ad">A<sup>d</sup>, %:</label>
+                    <input type="number" step="0.01" id="Ad" required>
+                </div>
+                <div class="input-group">
+                    <label for="Vg">V<sup>Г</sup>, мг/кг:</label>
+                    <input type="number" step="0.01" id="Vg" required>
+                </div>
+                
+                <button type="submit">Розрахувати</button>
+            </form>
+            
+            <div id="results2" class="results">
+                <h3>Результати:</h3>
+                <div id="resultsContent2"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
