@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор викидів твердих частинок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Калькулятор викидів твердих частинок</h1>
+    
+    <div class="form-group">
+        <label for="fuelType">Тип палива:</label>
+        <select id="fuelType">
+            <option value="coal">Вугілля</option>
+            <option value="oil">Мазут</option>
+            <option value="gas">Природний газ</option>
+        </select>
+    </div>
+    
+    <div id="coalParams" class="fuel-params">
+        <h2>Параметри вугілля</h2>
+        <div class="form-group">
+            <label for="coalAmount">Кількість вугілля (т):</label>
+            <input type="number" id="coalAmount" value="364962.61">
+        </div>
+        <div class="form-group">
+            <label for="coalQr">Нижча теплота згоряння (МДж/кг):</label>
+            <input type="number" id="coalQr" value="20.47" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="coalAsh">Вміст золи (A', %):</label>
+            <input type="number" id="coalAsh" value="25.20" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="coalCombustible">Горючі речовини у викиді (Γвин, %):</label>
+            <input type="number" id="coalCombustible" value="1.5" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="coalBoilerType">Тип котла:</label>
+            <select id="coalBoilerType">
+                <option value="0.8">Відкрита топка з рідким шлаковидаленням</option>
+                <option value="0.95">З твердим (сухим) шлаковидаленням</option>
+                <option value="0.7">Напіввідкрита топка з рідким шлаковидаленням</option>
+                <option value="0.55">Двокамерна топка</option>
+                <option value="0.3">З вертикальним передтонком</option>
+                <option value="0.15">Горизонтальна циклонна</option>
+                <option value="0.5">З циркулюючим киплячим шаром</option>
+                <option value="0.2">З бульбашковим киплячим шаром</option>
+                <option value="0.15">З нерухомим шаром</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="coalFilterEfficiency">Ефективність фільтра (ηзу):</label>
+            <input type="number" id="coalFilterEfficiency" value="0.985" step="0.001" min="0" max="1">
+        </div>
+    </div>
+    
+    <div id="oilParams" class="fuel-params" style="display: none;">
+        <h2>Параметри мазуту</h2>
+        <div class="form-group">
+            <label for="oilAmount">Кількість мазуту (т):</label>
+            <input type="number" id="oilAmount" value="196736.07">
+        </div>
+        <div class="form-group">
+            <label for="oilQr">Нижча теплота згоряння (МДж/кг):</label>
+            <input type="number" id="oilQr" value="39.48" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="oilAsh">Вміст золи (A', %):</label>
+            <input type="number" id="oilAsh" value="0.15" step="0.01">
+        </div>
+        <div class="form-group">
+            <label for="oilCombustible">Горючі речовини у викиді (Γвин, %):</label>
+            <input type="number" id="oilCombustible" value="0" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="oilFilterEfficiency">Ефективність фільтра (ηзу):</label>
+            <input type="number" id="oilFilterEfficiency" value="0.985" step="0.001" min="0" max="1">
+        </div>
+    </div>
+    
+    <div id="gasParams" class="fuel-params" style="display: none;">
+        <h2>Параметри природного газу</h2>
+        <div class="form-group">
+            <label for="gasAmount">Кількість газу (тис. м³):</label>
+            <input type="number" id="gasAmount" value="216824.33">
+        </div>
+        <div class="form-group">
+            <label for="gasQr">Нижча теплота згоряння (МДж/м³):</label>
+            <input type="number" id="gasQr" value="33.08" step="0.01">
+        </div>
+    </div>
+    
+    <button id="calculateBtn">Розрахувати</button>
+    
+    <div class="results" id="results" style="display: none;">
+        <h2>Результати розрахунків</h2>
+        <table>
+            <tr>
+                <th>Параметр</th>
+                <th>Значення</th>
+            </tr>
+            <tr>
+                <td>Показник емісії твердих частинок (г/ГДж)</td>
+                <td id="emissionFactor"></td>
+            </tr>
+            <tr>
+                <td>Валовий викид твердих частинок (т)</td>
+                <td id="totalEmission"></td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="control-example" style="margin-top: 40px;">
+        <h2>Контрольний приклад</h2>
+        <p>Для перевірки правильності роботи калькулятора використаємо дані з контрольного прикладу:</p>
+        <button id="runControlExample">Запустити контрольний приклад</button>
+        <div id="controlExampleResults" style="display: none; margin-top: 20px;">
+            <h3>Результати контрольного прикладу</h3>
+            <table>
+                <tr>
+                    <th>Паливо</th>
+                    <th>Показник емісії (г/ГДж)</th>
+                    <th>Валовий викид (т)</th>
+                </tr>
+                <tr>
+                    <td>Вугілля</td>
+                    <td id="ceCoalFactor">150</td>
+                    <td id="ceCoalEmission">3366</td>
+                </tr>
+                <tr>
+                    <td>Мазут</td>
+                    <td id="ceOilFactor">0.57</td>
+                    <td id="ceOilEmission">1.60</td>
+                </tr>
+                <tr>
+                    <td>Природний газ</td>
+                    <td id="ceGasFactor">0</td>
+                    <td id="ceGasEmission">0</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
