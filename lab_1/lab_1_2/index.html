@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Composition Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        input {
+            margin-left: 10px;
+            width: 60px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: auto;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+        #errorMessage {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h2>Калькулятор складу палива</h2>
+    <fieldset>
+        <legend>Введіть відсотковий склад</legend>
+
+        <label for="CP">C<sup>p</sup>
+            <input type="number" id="CP" placeholder="C<sup>p</sup>" min="0" max="100" step="0.01" value="38.6"> (%)
+        </label>
+
+        <label for="HP">H<sup>p</sup>
+            <input type="number" id="HP" placeholder="H<sup>p</sup>" min="0" max="100" step="0.01" value="2.6"> (%)
+        </label>
+
+        <label for="OP">O<sup>p</sup>
+            <input type="number" id="OP" placeholder="O<sup>p</sup>" min="0" max="100" step="0.01" value="3.10"> (%)
+        </label>
+
+        <label for="SP">S<sup>p</sup>
+            <input type="number" id="SP" placeholder="S<sup>p</sup>" min="0" max="100" step="0.01" value="3.80"> (%)
+        </label>
+
+        <label for="NP">N<sup>p</sup>
+            <input type="number" id="NP" placeholder="N<sup>p</sup>" min="0" max="100" step="0.01" value="0.8"> (%)
+        </label>
+
+        <label for="W">W
+            <input type="number" id="W" placeholder="W" min="0" max="100" step="0.01" value="11"> (%)
+        </label>
+
+        <label for="A">A
+            <input type="number" id="A" placeholder="A" min="0" max="100" step="0.01" value="40.1"> (%)
+        </label>
+
+        <label for="Qi_daf">Qi_daf:
+            <input type="number" id="Qi_daf" placeholder="Qi_daf" min="0" step="0.01" value="40.40"> (МДж/кг)
+        </label>
+
+        <label for="V">Вміст ванадію:
+            <input type="number" id="V" placeholder="Ванадій" min="0" step="0.1" value="333.3"> (мг/кг)
+        </label>
+    </fieldset>
+
+    <p id="errorMessage"></p>
+    <button id="calculateButton" style="padding: 10px;" onclick="calculate()" disabled>Розрахувати</button>
+    <div id="results"></div>
+
+    <script>
+        function getInputValues() {
+            return {
+                C: parseFloat(document.getElementById("CP").value) || 0,
+                H: parseFloat(document.getElementById("HP").value) || 0,
+                O: parseFloat(document.getElementById("OP").value) || 0,
+                S: parseFloat(document.getElementById("SP").value) || 0,
+                N: parseFloat(document.getElementById("NP").value) || 0,
+                W: parseFloat(document.getElementById("W").value) || 0,
+                A: parseFloat(document.getElementById("A").value) || 0,
+                V: parseFloat(document.getElementById("V").value) || 0,
+                Qi_daf: parseFloat(document.getElementById("Qi_daf").value) || 0
+            };
+        }
+
+        function validateSum() {
+            const { C, H, O, S, N, W, A } = getInputValues();
+            const total = C + H + O + S + N + W + A;
+            const button = document.getElementById("calculateButton");
+            const message = document.getElementById("errorMessage");
+
+            if (total !== 100) {
+                button.disabled = true;
+                message.textContent = `Сума має бути 100%. Поточна: ${total.toFixed(2)}%`;
+            } else {
+                button.disabled = false;
+                message.textContent = "";
+            }
+        }
+
+        function calculate() {
+            const { C, H, O, S, N, Qi_daf, W, A, V } = getInputValues();
+            const Kp = (100 - W - A) / 100;
+            const results = {
+                C_r: C * Kp,
+                H_r: H * Kp,
+                O_r: O * Kp,
+                S_r: S * Kp,
+                N_r: N * Kp,
+                V_r: V * (100 - W) / 100,
+                Qr: Qi_daf * Kp
+            };
+
+            document.getElementById("results").innerHTML = `
+                <table>
+                    <tr><th>Параметр</th><th>Значення</th></tr>
+                    <tr><td>C</td><td>${results.C_r.toFixed(2)}</td></tr>
+                    <tr><td>H</td><td>${results.H_r.toFixed(2)}</td></tr>
+                    <tr><td>O</td><td>${results.O_r.toFixed(2)}</td></tr>
+                    <tr><td>S</td><td>${results.S_r.toFixed(2)}</td></tr>
+                    <tr><td>N</td><td>${results.N_r.toFixed(2)}</td></tr>
+                    <tr><td>Ванадій</td><td>${results.V_r.toFixed(2)}</td></tr>
+                    <tr><td>Низька теплота згоряння</td><td>${results.Qr.toFixed(2)}</td></tr>
+                </table>`;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("input[type='number']").forEach(input => {
+                input.addEventListener("input", validateSum);
+            });
+            validateSum();
+        });
+    </script>
+</body>
+</html>
