@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятор надійності електропостачання</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f4fc;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab-buttons button {
+            margin-right: 5px;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Калькулятор надійності електропостачання</h1>
+    
+    <div class="tab-buttons">
+        <button onclick="showTab('reliability')">Надійність системи</button>
+        <button onclick="showTab('losses')">Збитки від переривання</button>
+    </div>
+    
+    <div id="reliability" class="container">
+        <h2>Розрахунок надійності системи</h2>
+        
+        <label for="elementType">Тип елемента:</label>
+        <select id="elementType">
+            <option value="line110">ПЛ-110 кВ</option>
+            <option value="line35">ПЛ-35 кВ</option>
+            <option value="line10">ПЛ-10 кВ</option>
+            <option value="cable10">КЛ-10 кВ</option>
+            <option value="trans110">Трансформатор 110 кВ</option>
+            <option value="trans35">Трансформатор 35 кВ</option>
+            <option value="trans10">Трансформатор 10 кВ</option>
+            <option value="breaker110">Вимикач 110 кВ</option>
+            <option value="breaker10">Вимикач 10 кВ</option>
+        </select>
+        
+        <label for="elementLength">Довжина (км) - для ліній:</label>
+        <input type="number" id="elementLength" value="10" min="0" step="0.1">
+        
+        <button onclick="addElement()">Додати елемент</button>
+        
+        <div id="elementsTableContainer" class="hidden">
+            <h3>Додані елементи:</h3>
+            <table id="elementsTable">
+                <thead>
+                    <tr>
+                        <th>Елемент</th>
+                        <th>ω (рік⁻¹)</th>
+                        <th>tв (год)</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <tbody id="elementsTableBody"></tbody>
+            </table>
+        </div>
+        
+        <label for="systemType">Тип системи:</label>
+        <select id="systemType">
+            <option value="single">Одноколова</option>
+            <option value="double">Двоколова</option>
+        </select>
+        
+        <div id="sectionalSwitchContainer" class="hidden">
+            <label for="hasSectionalSwitch">Секційний вимикач:</label>
+            <select id="hasSectionalSwitch">
+                <option value="no">Немає</option>
+                <option value="yes">Є</option>
+            </select>
+        </div>
+        
+        <button onclick="calculateReliability()">Розрахувати надійність</button>
+        
+        <div id="reliabilityResults" class="result hidden">
+            <h3>Результати:</h3>
+            <p>Частота відмов системи: <span id="omegaSystem">0</span> рік⁻¹</p>
+            <p>Середній час відновлення: <span id="tBSystem">0</span> год.</p>
+            <p>Коефіцієнт аварійного простою: <span id="kaSystem">0</span>·10⁻⁴</p>
+            <p>Коефіцієнт планового простою: <span id="kpSystem">0</span>·10⁻⁴</p>
+        </div>
+    </div>
+    
+    <div id="losses" class="container hidden">
+        <h2>Розрахунок збитків від переривання</h2>
+        
+        <label for="zper_a">Збитки від аварій (грн/кВт·год):</label>
+        <input type="number" id="zper_a" value="23.6" step="0.1">
+        
+        <label for="zper_p">Збитки від планових вимкнень (грн/кВт·год):</label>
+        <input type="number" id="zper_p" value="17.6" step="0.1">
+        
+        <label for="omega_loss">Частота відмов (рік⁻¹):</label>
+        <input type="number" id="omega_loss" value="0.01" step="0.001">
+        
+        <label for="t_v_loss">Середній час відновлення (год):</label>
+        <input type="number" id="t_v_loss" value="45" step="1">
+        
+        <label for="k_p_loss">Плановий простій (год/рік):</label>
+        <input type="number" id="k_p_loss" value="4" step="0.1">
+        
+        <label for="P_m">Потужність (кВт):</label>
+        <input type="number" id="P_m" value="5120" step="10">
+        
+        <label for="T_m">Години роботи (год/рік):</label>
+        <input type="number" id="T_m" value="6451" step="1">
+        
+        <button onclick="calculateLosses()">Розрахувати збитки</button>
+        
+        <div id="lossesResults" class="result hidden">
+            <h3>Результати:</h3>
+            <p>Аварійне недовідпущення: <span id="M_W_ned_a">0</span> кВт·год</p>
+            <p>Планове недовідпущення: <span id="M_W_ned_p">0</span> кВт·год</p>
+            <p>Сподівані збитки: <span id="M_Z_per">0</span> грн</p>
+        </div>
+    </div>
+
+    <script>
+        const HOURS_IN_YEAR = 8760;
+        let elements = [];
+        
+        const elementParams = {
+            line110: { name: "ПЛ-110 кВ", omega: 0.007, tB: 10 },
+            line35: { name: "ПЛ-35 кВ", omega: 0.02, tB: 8 },
+            line10: { name: "ПЛ-10 кВ", omega: 0.02, tB: 10 },
+            cable10: { name: "КЛ-10 кВ", omega: 0.03, tB: 44 },
+            trans110: { name: "Трансформатор 110 кВ", omega: 0.015, tB: 100 },
+            trans35: { name: "Трансформатор 35 кВ", omega: 0.02, tB: 80 },
+            trans10: { name: "Трансформатор 10 кВ", omega: 0.005, tB: 60 },
+            breaker110: { name: "Вимикач 110 кВ", omega: 0.01, tB: 30 },
+            breaker10: { name: "Вимикач 10 кВ", omega: 0.02, tB: 15 }
+        };
+        
+        function showTab(tabName) {
+            document.getElementById('reliability').classList.add('hidden');
+            document.getElementById('losses').classList.add('hidden');
+            document.getElementById(tabName).classList.remove('hidden');
+        }
+        
+        function addElement() {
+            const elementType = document.getElementById('elementType').value;
+            const length = parseFloat(document.getElementById('elementLength').value) || 1;
+            
+            const params = elementParams[elementType];
+            if (!params) return;
+            
+            const omega = params.omega * (elementType.includes('line') || elementType.includes('cable') ? length : 1);
+            
+            elements.push({
+                name: params.name + (elementType.includes('line') || elementType.includes('cable') ? ` (${length} км)` : ''),
+                omega: omega,
+                tB: params.tB
+            });
+            
+            updateElementsTable();
+        }
+        
+        function updateElementsTable() {
+            const tbody = document.getElementById('elementsTableBody');
+            tbody.innerHTML = '';
+            
+            if (elements.length === 0) {
+                document.getElementById('elementsTableContainer').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('elementsTableContainer').classList.remove('hidden');
+            
+            elements.forEach((element, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${element.name}</td>
+                    <td>${element.omega.toFixed(4)}</td>
+                    <td>${element.tB}</td>
+                    <td><button onclick="removeElement(${index})">Видалити</button></td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function removeElement(index) {
+            elements.splice(index, 1);
+            updateElementsTable();
+        }
+        
+        function calculateReliability() {
+            if (elements.length === 0) {
+                alert('Додайте хоча б один елемент');
+                return;
+            }
+            
+            const systemType = document.getElementById('systemType').value;
+            const hasSectionalSwitch = systemType === 'double' ? 
+                document.getElementById('hasSectionalSwitch').value === 'yes' : false;
+            
+            let omegaSystem = 0;
+            let tBSystem = 0;
+            let omegaSum = 0;
+            let tBSum = 0;
+            
+            elements.forEach(element => {
+                omegaSum += element.omega;
+                tBSum += element.omega * element.tB;
+            });
+            
+            omegaSystem = omegaSum;
+            tBSystem = tBSum / omegaSum;
+            
+            let kaSystem = omegaSystem * tBSystem / HOURS_IN_YEAR;
+            let kpSystem = 1.2 * (100 / HOURS_IN_YEAR);
+            
+            if (systemType === 'double') {
+                const kaSingle = kaSystem;
+                const kpSingle = kpSystem;
+                
+                const omegaDouble = 2 * omegaSum * (kaSingle + 0.5 * kpSingle);
+                const tBDouble = tBSystem * tBSystem / (2 * tBSystem);
+                
+                omegaSystem = omegaDouble;
+                tBSystem = tBDouble;
+                
+                if (hasSectionalSwitch) {
+                    omegaSystem += 0.02;
+                }
+                
+                kaSystem = omegaSystem * tBSystem / HOURS_IN_YEAR;
+                kpSystem = 0;
+            }
+            
+            document.getElementById('omegaSystem').textContent = omegaSystem.toFixed(4);
+            document.getElementById('tBSystem').textContent = tBSystem.toFixed(1);
+            document.getElementById('kaSystem').textContent = (kaSystem * 1e4).toFixed(2);
+            document.getElementById('kpSystem').textContent = (kpSystem * 1e4).toFixed(2);
+            document.getElementById('reliabilityResults').classList.remove('hidden');
+            
+            document.getElementById('sectionalSwitchContainer').classList.toggle('hidden', systemType !== 'double');
+        }
+        
+        function calculateLosses() {
+            const zper_a = parseFloat(document.getElementById('zper_a').value) || 0;
+            const zper_p = parseFloat(document.getElementById('zper_p').value) || 0;
+            const omega = parseFloat(document.getElementById('omega_loss').value) || 0;
+            const t_v = parseFloat(document.getElementById('t_v_loss').value) || 0;
+            const k_p = parseFloat(document.getElementById('k_p_loss').value) || 0;
+            const P_m = parseFloat(document.getElementById('P_m').value) || 0;
+            const T_m = parseFloat(document.getElementById('T_m').value) || 0;
+            
+            const M_W_ned_a = omega * t_v * P_m * T_m / HOURS_IN_YEAR;
+            const M_W_ned_p = k_p * P_m * T_m / HOURS_IN_YEAR;
+            
+            const M_Z_per = zper_a * M_W_ned_a + zper_p * M_W_ned_p;
+            
+            document.getElementById('M_W_ned_a').textContent = Math.round(M_W_ned_a);
+            document.getElementById('M_W_ned_p').textContent = Math.round(M_W_ned_p);
+            document.getElementById('M_Z_per').textContent = Math.round(M_Z_per);
+            document.getElementById('lossesResults').classList.remove('hidden');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('systemType').addEventListener('change', function() {
+                document.getElementById('sectionalSwitchContainer').classList.toggle('hidden', this.value !== 'double');
+            });
+        });
+    </script>
+</body>
+</html>
