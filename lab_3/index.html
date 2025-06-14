@@ -1,30 +1,91 @@
 <!DOCTYPE html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Калькулятор прибутку СЕС</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <>
-	<main></main>
-		<div class="container">
-		<h2>Калькулятор прибутку від СЕС</h2>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Калькулятор прибутку СЕС</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 600px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		input {
+			width: 100%;
+			padding: 8px;
+			margin-bottom: 10px;
+		}
+		button {
+			padding: 10px 15px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			cursor: pointer;
+		}
+		.result {
+			margin-top: 20px;
+			font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+	<h2>Калькулятор прибутку СЕС</h2>
+	
+	<label>Середньодобова потужність (МВт):</label>
+	<input type="number" id="power" value="5">
+	
+	<label>Середньоквадратичне відхилення (МВт):</label>
+	<input type="number" id="deviation" value="1">
+	
+	<label>Вартість електроенергії (грн/кВт·год):</label>
+	<input type="number" id="cost" value="7">
+	
+	<button onclick="calculate()">Розрахувати</button>
+	
+	<div class="result" id="result"></div>
 
-		<label for="avg_daily_power">Середньодобова потужність (МВт): </label>
-		<input type="number" id="avg_daily_power" placeholder="Наприклад, 5" min="0" />
-
-		<label for="avg_deviation">Середньоквадратичне відхилення системи прогнозування (МВт):</label>
-		<input	type="number" id="avg_deviation" placeholder="Наприклад, 25" min="0"/>
-
-		<label for="energy_cost">Вартість електроенергії (грн/кВт*год):</label>
-		<input	type="number" id="energy_cost" placeholder="Наприклад, 25" min="0"/>
+	<script>
+		function calculate() {
+			const Pc = parseFloat(document.getElementById('power').value);
+			const σ = parseFloat(document.getElementById('deviation').value);
+			const B = parseFloat(document.getElementById('cost').value);
+			
+			const a = Pc - 0.05 * Pc;
+			const b = Pc + 0.05 * Pc;
+			const δW = integrateNormal(a, b, Pc, σ);
+			
+			const W1 = Pc * 24 * δW;
+			const П1 = W1 * B * 1000;
+			
+			const W2 = Pc * 24 * (1 - δW);
+			const Ш1 = W2 * B * 1000;
+			
+			const profit = П1 - Ш1;
+			
+			document.getElementById('result').innerHTML = `
+				<p>Частка енергії без небалансів: ${(δW * 100).toFixed(2)}%</p>
+				<p>Прибуток від енергії без небалансів: ${П1.toFixed(2)} грн</p>
+				<p>Штраф за небаланси: ${Ш1.toFixed(2)} грн</p>
+				<p><strong>Загальний прибуток: ${profit.toFixed(2)} грн</strong></p>
+			`;
+		}
 		
-		<button onclick="handleCalculate()">Розрахувати</button>
-
-		<div class="result" id="result"></div>
-		</div>
-	</main>
-    <script src="script.js"></script>
-  </body>
+		function normalDistribution(x, mean, stdDev) {
+			return Math.exp(-0.5 * Math.pow((x - mean)/stdDev, 2)) / (stdDev * Math.sqrt(2 * Math.PI));
+		}
+		
+		function integrateNormal(a, b, mean, stdDev, steps = 10000) {
+			const dx = (b - a) / steps;
+			let sum = 0;
+			
+			for (let i = 0; i < steps; i++) {
+				const x = a + i * dx;
+				sum += normalDistribution(x, mean, stdDev) * dx;
+			}
+			
+			return sum;
+		}
+	</script>
+</body>
 </html>
