@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Електротехнічний калькулятор</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .calculator-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .calculator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .input-error {
+            border-color: var(--danger);
+            background-color: rgba(231, 76, 60, 0.05);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--secondary);
+            font-size: 1.1rem;
+            min-height: 60px;
+        }
+        
+        .success {
+            color: var(--success);
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .info {
+            color: var(--secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Електротехнічний калькулятор</h1>
+            <p class="subtitle">Розрахунки коротких замикань та стійкості кабелів</p>
+        </header>
+        
+        <div class="calculator-grid">
+            <div class="calculator-card">
+                <h2 class="card-title">Трифазне КЗ</h2>
+                <div class="input-group">
+                    <label for="u">Напруга (кВ):</label>
+                    <input type="number" id="u" placeholder="10" min="0" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="z">Повний опір (Ом):</label>
+                    <input type="number" id="z" placeholder="0.5" min="0" step="0.01">
+                </div>
+                <button onclick="calculateThreePhase()">Розрахувати</button>
+                <div class="result-box" id="result1"></div>
+            </div>
+            
+            <div class="calculator-card">
+                <h2 class="card-title">Однофазне КЗ</h2>
+                <div class="input-group">
+                    <label for="u2">Напруга (кВ):</label>
+                    <input type="number" id="u2" placeholder="10" min="0" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="mode">Режим роботи:</label>
+                    <select id="mode">
+                        <option value="norm">Нормальний</option>
+                        <option value="min">Мінімальний</option>
+                        <option value="emerg">Аварійний</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="z2">Повний опір (Ом):</label>
+                    <input type="number" id="z2" placeholder="1" min="0" step="0.01">
+                </div>
+                <button onclick="calculateSinglePhase()">Розрахувати</button>
+                <div class="result-box" id="result2"></div>
+            </div>
+            
+            <div class="calculator-card">
+                <h2 class="card-title">Перевірка кабелю</h2>
+                <div class="input-group">
+                    <label for="Ik3">Струм КЗ (кА):</label>
+                    <input type="number" id="Ik3" placeholder="5" min="0" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="tk">Час дії (с):</label>
+                    <input type="number" id="tk" placeholder="1" min="0" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="S">Переріз кабелю (мм²):</label>
+                    <input type="number" id="S" placeholder="120" min="0" step="1">
+                </div>
+                <button onclick="checkCable()">Перевірити</button>
+                <div class="result-box" id="result3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SQRT_3 = Math.sqrt(3);
+        const MILLI = 1000;
+        const K_THERMAL = 143;
+        const K_DYNAMIC = 60;
+        
+        const ModeLabels = {
+            norm: "Нормальний режим",
+            min: "Мінімальний режим",
+            emerg: "Аварійний режим"
+        };
+        
+        function getValue(inputId) {
+            const input = document.getElementById(inputId);
+            const value = parseFloat(input.value);
+            return isNaN(value) ? null : value;
+        }
+        
+        function validateInput(inputId) {
+            const input = document.getElementById(inputId);
+            const value = getValue(inputId);
+            const isValid = value !== null && value > 0;
+            
+            input.classList.toggle("input-error", !isValid);
+            return isValid;
+        }
+        
+        function showResult(resultId, message, isSuccess = true) {
+            const resultBox = document.getElementById(resultId);
+            resultBox.textContent = message;
+            resultBox.className = "result-box " + (isSuccess ? "success" : "error");
+        }
+        
+        function calculateThreePhase() {
+            const uValid = validateInput("u");
+            const zValid = validateInput("z");
+            
+            if (!uValid || !zValid) {
+                showResult("result1", "Будь ласка, введіть коректні значення", false);
+                return;
+            }
+            
+            const U = getValue("u");
+            const Z = getValue("z");
+            const Ik = (U * MILLI) / (SQRT_3 * Z);
+            const IkKA = Ik / MILLI;
+            
+            showResult("result1", `Струм трифазного КЗ: ${IkKA.toFixed(2)} кА`);
+        }
+        
+        function calculateSinglePhase() {
+            const uValid = validateInput("u2");
+            const zValid = validateInput("z2");
+            
+            if (!uValid || !zValid) {
+                showResult("result2", "Будь ласка, введіть коректні значення", false);
+                return;
+            }
+            
+            const U = getValue("u2");
+            const Z = getValue("z2");
+            const mode = document.getElementById("mode").value;
+            const I = (U * MILLI) / Z;
+            const modeLabel = ModeLabels[mode] || "Невідомий режим";
+            
+            showResult("result2", `${modeLabel}: ${I.toFixed(2)} А`);
+        }
+        
+        function checkCable() {
+            const ikValid = validateInput("Ik3");
+            const tValid = validateInput("tk");
+            const sValid = validateInput("S");
+            
+            if (!ikValid || !tValid || !sValid) {
+                showResult("result3", "Будь ласка, введіть коректні значення", false);
+                return;
+            }
+            
+            const Ik = getValue("Ik3");
+            const t = getValue("tk");
+            const S = getValue("S");
+            const I = Ik * MILLI;
+            
+            const requiredSection = (I * Math.sqrt(t)) / K_THERMAL;
+            const thermalOk = S >= requiredSection;
+            
+            const dynamicOk = Ik <= S * K_DYNAMIC;
+            
+            let result = "";
+            result += thermalOk 
+                ? "✅ Термічна стійкість: витримано\n" 
+                : "❌ Термічна стійкість: не витримано\n";
+            result += dynamicOk 
+                ? "✅ Динамічна стійкість: витримано\n" 
+                : "❌ Динамічна стійкість: не витримано\n";
+            result += `Мінімальний переріз: ${requiredSection.toFixed(2)} мм²`;
+            
+            const allOk = thermalOk && dynamicOk;
+            showResult("result3", result, allOk);
+        }
+    </script>
+</body>
+</html>
